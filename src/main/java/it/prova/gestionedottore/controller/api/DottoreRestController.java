@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import it.prova.gestionedottore.dto.DottoreDTO;
@@ -51,22 +52,23 @@ public class DottoreRestController {
 	}
 
 	@PostMapping
+	@ResponseStatus(HttpStatus.CREATED)
 	public Dottore createNewDottore(@RequestBody Dottore dottoreInput) {
 		return dottoreService.save(dottoreInput);
 	}
 
 	@PutMapping("/{id}")
+	@ResponseStatus(HttpStatus.OK)
 	public Dottore updateDottore(@RequestBody Dottore dottoreInput, @PathVariable Long id) {
 		Dottore dottoreToUpdate = dottoreService.get(id);
 		dottoreToUpdate.setNome(dottoreInput.getNome());
 		dottoreToUpdate.setCognome(dottoreInput.getCognome());
 		dottoreToUpdate.setCodiceDipendente(dottoreInput.getCodiceDipendente());
-		dottoreToUpdate.setInServizio(dottoreInput.isInServizio());
-		dottoreToUpdate.setInVisita(dottoreInput.isInVisita());
 		return dottoreService.save(dottoreToUpdate);
 	}
 
 	@DeleteMapping("/{id}")
+	@ResponseStatus(HttpStatus.OK)
 	public void deleteDottore(@PathVariable(required = true) Long id) {
 		dottoreService.delete(dottoreService.get(id));
 	}
@@ -77,14 +79,15 @@ public class DottoreRestController {
 	}
 
 	@PostMapping("/impostaInVisita")
-	public DottoreDTO impostaInVisita(@RequestBody Dottore dottore) {
+	@ResponseStatus(HttpStatus.OK)
+	public DottoreDTO impostaInVisita(@RequestBody DottoreDTO dottore) {
 
 		Dottore dottoreCaricato = dottoreService.impostaInVisita(dottore.getCodiceDipendente());
 
 		if (dottoreCaricato == null || dottoreCaricato.getId() == null)
 			throw new DottoreNotFoundException("Dottore non trovato con codice specificato");
 
-		return DottoreDTO.buildDottoreDTOFromModel(dottoreService.impostaInVisita(dottore.getCodiceDipendente()));
+		return DottoreDTO.buildDottoreDTOFromModel(dottoreCaricato);
 	}
 
 }
